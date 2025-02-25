@@ -62,3 +62,18 @@ jobs:
         tags: |
           ghcr.io/${{ github.repository }}/recommender-api:latest
           ghcr.io/${{ github.repository }}/recommender-api:${{ github.sha }}
+    
+    - name: Login to DockerHub
+      uses: docker/login-action@v2
+      with:
+            username: ${{ secrets.DOCKERHUB_USERNAME }}
+            password: ${{ secrets.DOCKERHUB_TOKEN }}
+        
+    - name: Build and push API image
+      uses: docker/build-push-action@v4
+      with:
+            context: .
+            push: true
+            tags: |
+              ${{ secrets.DOCKERHUB_USERNAME }}/recommender-api:latest
+              ${{ secrets.DOCKERHUB_USERNAME }}/recommender-api:${{ github.sha }}    
