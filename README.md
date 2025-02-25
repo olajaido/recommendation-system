@@ -63,7 +63,7 @@ This project implements a complete machine learning operations (MLOps) pipeline 
 
 1. Clone this repository:
 ```bash
-git clone https://github.com/yourusername/recommendation-system.git
+git clone https://github.com/olajaido/recommendation-system.git
 cd recommendation-system
 
 # Create virtual environment
@@ -200,9 +200,9 @@ We welcome contributions! If you'd like to improve the project:
 
 ## Contact
 
-- **Your Name**: your.email@example.com
-- **Project Link**: [GitHub Repository](https://github.com/yourusername/recommendation-system)
+- **Your Name**: engineerj2000@gmail.com
+- **Project Link**: [GitHub Repository](https://github.com/olajaido/recommendation-system.git)
 
 ## Support
 
-If you encounter any issues or have questions, please [open an issue](https://github.com/yourusername/recommendation-system/issues) on the GitHub repository.
+If you encounter any issues or have questions, please [open an issue](https://github.com/olajaido/recommendation-system.git) on the GitHub repository.
