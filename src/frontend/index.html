@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MovieMind | AI Recommendation Engine</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2D46B9;
+            --primary-dark: #1D3495;
+            --secondary: #FF5A5F;
+            --dark: #1E2A4A;
+            --light: #F8F9FA;
+            --gray: #6C757D;
+            --success: #28A745;
+            --info: #17A2B8;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #F0F2F5;
+            color: var(--dark);
+            padding-bottom: 40px;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+        }
+        
+        .navbar {
+            background-color: var(--primary);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-brand i {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.12);
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-weight: 600;
+            padding: 15px 20px;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 10px 15px;
+            border-color: #E1E5EA;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 0 3px rgba(45, 70, 185, 0.25);
+            border-color: var(--primary);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .movie-card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .movie-poster {
+            height: 200px;
+            background: linear-gradient(135deg, #2D46B9, #6C757D);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .movie-poster::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.4));
+        }
+        
+        .movie-poster i {
+            font-size: 3rem;
+            z-index: 1;
+        }
+        
+        .movie-details {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .movie-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+        
+        .movie-year {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        
+        .movie-score {
+            background-color: var(--primary);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        
+        .movie-genres {
+            color: var(--gray);
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+        
+        .explanation-btn {
+            margin-top: auto;
+            width: 100%;
+            border-radius: 8px;
+            padding: 8px 0;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .section-title {
+            margin-bottom: 25px;
+            color: var(--dark);
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background-color: var(--primary);
+        }
+        
+        .alert-success {
+            background-color: #E3F9E5;
+            border-color: #A3E4A7;
+            color: #0F5132;
+            border-radius: 10px;
+        }
+        
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255,255,255,0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(45, 70, 185, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 15px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .metrics-card {
+            background-color: rgba(45, 70, 185, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .metrics-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        .metrics-list {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 10px;
+        }
+        
+        .metrics-list li {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .metrics-list li::before {
+            content: '•';
+            color: var(--primary);
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .model-label {
+            font-weight: 500;
+        }
+        
+        .rmse-value {
+            background-color: rgba(45, 70, 185, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 5px;
+            font-weight: 500;
+            color: var(--primary-dark);
+        }
+        
+        .model-info {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-top: 10px;
+        }
+        
+        .modal-content {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding: 15px 20px;
+        }
+        
+        .modal-title {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .explanation-section {
+            margin-bottom: 20px;
+        }
+        
+        .explanation-heading {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+        
+        .explanation-card {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        /* Responsiveness improvements */
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+            
+            .movie-poster {
+                height: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-film"></i>
+                MovieMind
+            </a>
+            <span class="navbar-text text-white opacity-75">AI Recommendation Engine</span>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Introduction -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="mb-3">Welcome to MovieMind</h4>
+                        <p>This advanced recommendation system uses multiple AI models to suggest movies you'll love. Try different models and settings to see how recommendations change!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="row">
+            <!-- Settings Panel -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-sliders-h me-2"></i> Recommendation Settings
+                    </div>
+                    <div class="card-body">
+                        <form id="recommendationForm">
+                            <div class="mb-3">
+                                <label for="userId" class="form-label">User ID (1-943)</label>
+                                <input type="number" class="form-control" id="userId" min="1" max="943" required value="42">
+                                <div class="form-text">Select a user to personalize recommendations</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="modelName" class="form-label">Recommendation Model</label>
+                                <select class="form-select" id="modelName">
+                                    <option value="hybrid_recommender">Hybrid Recommender (Content + Collaborative)</option>
+                                    <option value="neural_cf">Neural Collaborative Filtering</option>
+                                    <option value="matrix_factorization">Matrix Factorization</option>
+                                    <option value="user_based_cf">User-Based Collaborative Filtering</option>
+                                </select>
+                                <div class="form-text">Different models use different techniques</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="numRecommendations" class="form-label">Number of Recommendations</label>
+                                <div class="d-flex align-items-center">
+                                    <input type="range" class="form-range me-2" id="numRecommendations" min="1" max="20" value="6" oninput="document.getElementById('numRecommendationsValue').textContent = this.value">
+                                    <span id="numRecommendationsValue" class="badge bg-primary">6</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="diversityLevel" class="form-label">Diversity Level</label>
+                                <div class="d-flex align-items-center">
+                                    <input type="range" class="form-range me-2" id="diversityLevel" min="0" max="1" step="0.1" value="0.5" oninput="document.getElementById('diversityValue').textContent = this.value">
+                                    <span id="diversityValue" class="badge bg-primary">0.5</span>
+                                </div>
+                                <div class="form-text">Higher values promote more diverse recommendations</div>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="useBatchRecommendations">
+                                <label class="form-check-label" for="useBatchRecommendations">Use pre-computed batch recommendations</label>
+                                <div class="form-text">Faster, but may be less personalized</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-magic me-2"></i>Generate Recommendations
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Metrics Display -->
+                <div class="metrics-card" id="metricsInfo" style="display: none;">
+                    <h5 class="metrics-title"><i class="fas fa-chart-line me-2"></i>Model Performance</h5>
+                    <ul class="metrics-list" id="metricsList">
+                        <!-- Metrics will be populated here -->
+                    </ul>
+                    <div class="model-info">Lower RMSE values indicate better performance</div>
+                </div>
+            </div>
+            
+            <!-- Recommendations Display -->
+            <div class="col-lg-8">
+                <h4 class="section-title">Movie Recommendations</h4>
+                <div class="row" id="recommendations-container">
+                    <div class="col-12">
+                        <p class="text-center text-muted py-5">
+                            <i class="fas fa-film fa-3x mb-3 d-block"></i>
+                            Select a user and click "Generate Recommendations" to see personalized movie suggestions
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>MovieMind Recommendation Engine &copy; 2025</p>
+            <p class="small">Powered by MLOps & Neural Network Technologies</p>
+        </div>
+        
+        <!-- Explanation Modal -->
+        <div class="modal fade" id="explanationModal" tabindex="-1" aria-labelledby="explanationModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="explanationModalLabel">Recommendation Explanation</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="explanationContent">
+                        <div class="d-flex justify-content-center">
+                            <div class="loading-spinner"></div>
+                        </div>
+                        <p class="text-center">Loading explanation...</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Loading Overlay -->
+        <div id="loading" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p>Generating recommendations...</p>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // API endpoint
+        const API_BASE_URL = 'http://localhost:8000';
+        
+        // Initialize modals
+        const explanationModal = new bootstrap.Modal(document.getElementById('explanationModal'));
+        
+        // Get available models on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/models`);
+                const data = await response.json();
+                
+                const modelSelect = document.getElementById('modelName');
+                modelSelect.innerHTML = '';
+                
+                if (data.available_models && data.available_models.length > 0) {
+                    data.available_models.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model;
+                        option.textContent = formatModelName(model);
+                        option.selected = model === data.default_model;
+                        modelSelect.appendChild(option);
+                    });
+                }
+                
+                // Load model metrics
+                await loadModelMetrics();
+            } catch (error) {
+                console.error('Error loading models:', error);
+                showError('Error connecting to the recommendation API. Please make sure the server is running.');
+            }
+        });
+        
+        // Format model name for display
+        function formatModelName(modelName) {
+            return modelName
+                .split('_')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        }
+        
+        // Load model metrics
+        async function loadModelMetrics() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/metrics`);
+                const data = await response.json();
+                
+                if (data.metrics && Object.keys(data.metrics).length > 0) {
+                    const metricsList = document.getElementById('metricsList');
+                    metricsList.innerHTML = '';
+                    
+                    for (const model in data.metrics) {
+                        const modelMetrics = data.metrics[model];
+                        const testMetrics = modelMetrics.test || {};
+                        const rmse = testMetrics.rmse ? testMetrics.rmse.toFixed(4) : 'N/A';
+                        
+                        const li = document.createElement('li');
+                        li.innerHTML = `<span class="model-label">${formatModelName(model)}:</span> <span class="rmse-value">${rmse}</span>`;
+                        metricsList.appendChild(li);
+                    }
+                    
+                    document.getElementById('metricsInfo').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading metrics:', error);
+            }
+        }
+        
+        // Show error alert
+        function showError(message) {
+            const container = document.getElementById('recommendations-container');
+            container.innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i> ${message}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Handle recommendation form submission
+        document.getElementById('recommendationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userId = document.getElementById('userId').value;
+            const modelName = document.getElementById('modelName').value;
+            const numRecommendations = document.getElementById('numRecommendations').value;
+            const diversityLevel = document.getElementById('diversityLevel').value;
+            const useBatch = document.getElementById('useBatchRecommendations').checked;
+            
+            // Show loading indicator
+            document.getElementById('loading').style.display = 'flex';
+            
+            try {
+                let response, data;
+                
+                if (useBatch) {
+                    // Use batch recommendations
+                    response = await fetch(`${API_BASE_URL}/batch-recommendations/${userId}`);
+                    data = await response.json();
+                    
+                    if (response.ok) {
+                        displayBatchRecommendations(data);
+                    } else {
+                        showError(`Error: ${data.detail || 'Unknown error'}`);
+                    }
+                } else {
+                    // Use real-time recommendations
+                    response = await fetch(`${API_BASE_URL}/recommendations`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            user_id: parseInt(userId),
+                            model_name: modelName,
+                            num_recommendations: parseInt(numRecommendations),
+                            diversity_level: parseFloat(diversityLevel)
+                        }),
+                    });
+                    
+                    data = await response.json();
+                    
+                    if (response.ok) {
+                        displayRecommendations(data);
+                    } else {
+                        showError(`Error: ${data.detail || 'Unknown error'}`);
+                    }
+                }
+            } catch (error) {
+                console.error('Error getting recommendations:', error);
+                showError('Error connecting to the recommendation API. Please make sure the server is running.');
+            } finally {
+                // Hide loading indicator
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+        
+        // Display movie recommendations
+        function displayRecommendations(data) {
+            const container = document.getElementById('recommendations-container');
+            container.innerHTML = '';
+            
+            // Add header with info
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'col-12 mb-3';
+            headerDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <h5 class="mb-2"><i class="fas fa-user-circle me-2"></i>Recommendations for User ${data.user_id}</h5>
+                    <p class="mb-1"><strong>Model:</strong> ${formatModelName(data.model_used)}</p>
+                    <p class="mb-0"><strong>Response time:</strong> ${data.processing_time_ms.toFixed(2)} ms</p>
+                </div>
+            `;
+            container.appendChild(headerDiv);
+            
+            // Add recommendation cards
+            data.recommendations.forEach(movie => {
+                const genresList = Array.isArray(movie.genres) 
+                    ? movie.genres.join(', ') 
+                    : (movie.genres || 'Unknown');
+                
+                const col = document.createElement('div');
+                col.className = 'col-md-6 col-lg-4 mb-4';
+                col.innerHTML = `
+                    <div class="card movie-card">
+                        <div class="movie-poster">
+                            <i class="fas fa-film"></i>
+                        </div>
+                        <div class="card-body movie-details">
+                            <h5 class="movie-title">${movie.title}</h5>
+                            <div class="movie-year">${movie.year || 'Unknown Year'}</div>
+                            <div class="movie-score">
+                                <i class="fas fa-star me-1"></i> ${movie.predicted_score.toFixed(2)}
+                            </div>
+                            <div class="movie-genres">${genresList}</div>
+                            <button class="btn btn-outline-info btn-sm explanation-btn" 
+                                    data-user-id="${data.user_id}" 
+                                    data-movie-id="${movie.movie_id}" 
+                                    data-model="${data.model_used}">
+                                <i class="fas fa-question-circle me-1"></i> Why this recommendation?
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(col);
+            });
+            
+            // Add explanation handlers
+            document.querySelectorAll('.explanation-btn').forEach(badge => {
+                badge.addEventListener('click', async () => {
+                    const userId = badge.getAttribute('data-user-id');
+                    const movieId = badge.getAttribute('data-movie-id');
+                    const modelName = badge.getAttribute('data-model');
+                    
+                    await getExplanation(userId, movieId, modelName);
+                });
+            });
+        }
+        
+        // Display batch recommendations
+        function displayBatchRecommendations(data) {
+            const container = document.getElementById('recommendations-container');
+            container.innerHTML = '';
+            
+            // Add header with info
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'col-12 mb-3';
+            headerDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <h5 class="mb-2"><i class="fas fa-user-circle me-2"></i>Batch Recommendations for User ${data.user_id}</h5>
+                    <p class="mb-1"><strong>Source:</strong> ${data.batch_source}</p>
+                    <p class="mb-0"><strong>Generated:</strong> ${new Date(data.batch_generation_time).toLocaleString()}</p>
+                </div>
+            `;
+            container.appendChild(headerDiv);
+            
+            // Add recommendation cards
+            data.recommendations.forEach(movie => {
+                const genresList = Array.isArray(movie.genres) 
+                    ? movie.genres.join(', ') 
+                    : (movie.genres || 'Unknown');
+                
+                const col = document.createElement('div');
+                col.className = 'col-md-6 col-lg-4 mb-4';
+                col.innerHTML = `
+                    <div class="card movie-card">
+                        <div class="movie-poster">
+                            <i class="fas fa-film"></i>
+                        </div>
+                        <div class="card-body movie-details">
+                            <h5 class="movie-title">${movie.title}</h5>
+                            <div class="movie-year">${movie.year || 'Unknown Year'}</div>
+                            <div class="movie-score">
+                                <i class="fas fa-star me-1"></i> ${movie.predicted_score.toFixed(2)}
+                            </div>
+                            <div class="movie-genres">${genresList}</div>
+                            <button class="btn btn-outline-info btn-sm explanation-btn" 
+                                    data-user-id="${data.user_id}" 
+                                    data-movie-id="${movie.movie_id}" 
+                                    data-model="hybrid_recommender">
+                                <i class="fas fa-question-circle me-1"></i> Why this recommendation?
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(col);
+            });
+            
+            // Add explanation handlers
+            document.querySelectorAll('.explanation-btn').forEach(badge => {
+                badge.addEventListener('click', async () => {
+                    const userId = badge.getAttribute('data-user-id');
+                    const movieId = badge.getAttribute('data-movie-id');
+                    const modelName = badge.getAttribute('data-model');
+                    
+                    await getExplanation(userId, movieId, modelName);
+                });
+            });
+        }
+        
+        // Get explanation for recommendation
+        async function getExplanation(userId, movieId, modelName) {
+            // Set loading content
+            document.getElementById('explanationContent').innerHTML = `
+                <div class="d-flex justify-content-center">
+                    <div class="loading-spinner"></div>
+                </div>
+                <p class="text-center">Loading explanation...</p>
+            `;
+            explanationModal.show();
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/explain`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: parseInt(userId),
+                        movie_id: parseInt(movieId),
+                        model_name: modelName
+                    }),
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayExplanation(data);
+                } else {
+                    document.getElementById('explanationContent').innerHTML = 
+                        `<div class="alert alert-danger">Error: ${data.detail || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                console.error('Error getting explanation:', error);
+                document.getElementById('explanationContent').innerHTML = 
+                    '<div class="alert alert-danger">Error connecting to the explanation API.</div>';
+            }
+        }
+        
+        // Display explanation
+        function displayExplanation(data) {
+            const content = document.getElementById('explanationContent');
+            document.getElementById('explanationModalLabel').textContent = `Why "${data.movie_title}" was recommended`;
+            
+            let explanationHtml = `
+                <div class="explanation-section">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h5 class="card-title">${data.movie_title}</h5>
+                                    <p class="card-text text-muted">Recommended to User: ${data.user_id}</p>
+                                </div>
+                                <div class="movie-score">
+                                    <i class="fas fa-star me-1"></i> ${data.explanation.predicted_rating?.toFixed(2) || 'N/A'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            if (data.model_used === 'hybrid_recommender') {
+                explanationHtml += `
+                    <div class="explanation-section">
+                        <h6 class="explanation-heading">How This Recommendation Was Generated</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="explanation-card">
+                                    <h6 class="mb-2"><i class="fas fa-users me-2"></i>Collaborative Filtering</h6>
+                                    <p class="mb-0">Rating based on similar users: <strong>${data.explanation.cf_component?.toFixed(2) || 'N/A'}</strong></p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="explanation-card">
+                                    <h6 class="mb-2"><i class="fas fa-tags me-2"></i>Content Analysis</h6>
+                                    <p class="mb-0">Rating based on movie features: <strong>${data.explanation.content_component?.toFixed(2) || 'N/A'}</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                if (data.explanation.user_liked_movies && data.explanation.user_liked_movies.length > 0) {
+                    explanationHtml += `
+                        <div class="explanation-section">
+                            <h6 class="explanation-heading">Based on Movies You Liked</h6>
+                            <div class="explanation-card">
+                                <ul class="mb-0">
+                                    ${data.explanation.user_liked_movies.map(movie => `<li>${movie}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                if (data.explanation.similar_movies && data.explanation.similar_movies.length > 0) {
+                    explanationHtml += `
+                        <div class="explanation-section">
+                            <h6 class="explanation-heading">Similar Movies</h6>
+                            <div class="explanation-card">
+                                <ul class="mb-0">
+                                    ${data.explanation.similar_movies.map(movie => `<li>${movie}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                }
+            } else {
+                // Basic explanation for non-hybrid models
+                explanationHtml += `
+                    <div class="alert alert-info">
+                        <h6 class="mb-2"><i class="fas fa-info-circle me-2"></i>Model Information</h6>
+                        <p>This recommendation was made by the ${formatModelName(data.model_used)} model.</p>
+                        <p class="mb-0">Detailed explanations are only available for the Hybrid Recommender model.</p>
+                    </div>
+                `;
+            }
+            
+            content.innerHTML = explanationHtml;
+        }
+        
+        // Toggle range input value displays
+        document.getElementById('numRecommendations').addEventListener('input', function() {
+            document.getElementById('numRecommendationsValue').textContent = this.value;
+        });
+        
+        document.getElementById('diversityLevel').addEventListener('input', function() {
+            document.getElementById('diversityValue').textContent = this.value;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+      - ./metrics:/app/metrics
+    command: uvicorn src.serving.enhanced_api:app --host 0.0.0.0 --port 8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./src/frontend:/app/src/frontend
+    command: python -m src.frontend.server
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  monitoring:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+      - ./metrics:/app/metrics
+    command: python -m src.monitoring.drift_monitor
+    depends_on:
+      - api
+    restart: unless-stopped

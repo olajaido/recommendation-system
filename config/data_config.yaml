@@ -1,0 +1,30 @@
+# MovieLens dataset configuration
+movielens:
+  # Dataset options: "100k", "1m", "20m", "25m"
+  dataset_size: "100k"
+  
+  # URLs for different dataset sizes
+  urls:
+    100k: "https://files.grouplens.org/datasets/movielens/ml-100k.zip"
+    1m: "https://files.grouplens.org/datasets/movielens/ml-1m.zip"
+    20m: "https://files.grouplens.org/datasets/movielens/ml-20m.zip"
+    25m: "https://files.grouplens.org/datasets/movielens/ml-25m.zip"
+  
+  # Local storage paths
+  paths:
+    raw: "data/raw"
+    processed: "data/processed"
+    interim: "data/interim"
+    features: "data/features"
+  
+  # Files of interest in the dataset
+  files:
+    ratings: "ratings.dat"
+    movies: "movies.dat"
+    users: "users.dat"
+    
+  # Data splitting parameters
+  split:
+    test_size: 0.2
+    validation_size: 0.1
+    random_state: 42
